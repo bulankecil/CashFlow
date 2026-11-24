@@ -39,8 +39,6 @@ jobs:
         run: |
           sdkmanager "platform-tools" "platforms;android-36" "build-tools;36.0.0"
 
-      # Repository ini belum memiliki file ./gradlew.
-      # Karena itu Gradle 9.3.1 dipasang langsung dan dipanggil dengan perintah gradle.
       - name: Set up Gradle 9.3.1
         uses: gradle/actions/setup-gradle@v4
         with:
@@ -52,6 +50,22 @@ jobs:
           test -f build.gradle.kts
           test -f app/build.gradle.kts
           test -f gradle/libs.versions.toml
+
+      # app/build.gradle.kts explicitly points debug signing to this file.
+      # Generate the standard Android debug keystore because it is not committed to the repository.
+      - name: Generate debug keystore
+        run: |
+          if [ ! -f debug.keystore ]; then
+            keytool -genkeypair -v \
+              -keystore debug.keystore \
+              -storepass android \
+              -alias androiddebugkey \
+              -keypass android \
+              -keyalg RSA \
+              -keysize 2048 \
+              -validity 10000 \
+              -dname "CN=Android Debug,O=Android,C=US"
+          fi
 
       - name: Build debug APK
         run: gradle --no-daemon --stacktrace :app:assembleDebug
