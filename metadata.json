@@ -1,0 +1,6 @@
+{
+  "name": "Fintek",
+  "description": "Aplikasi keuangan pribadi offline berbahasa Indonesia untuk mencatat pemasukan, pengeluaran, dompet, dan analitik arus kas dalam Rupiah.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

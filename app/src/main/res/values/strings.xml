@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Fintek</string>
+    <string name="nav_dashboard">Beranda</string>
+    <string name="nav_transactions">Transaksi</string>
+    <string name="nav_analytics">Analitik</string>
+    <string name="nav_wallets">Dompet</string>
+    <string name="nav_settings">Pengaturan</string>
+    <string name="action_record_transaction">Catat</string>
+    <string name="cd_toggle_theme">Ubah tema terang atau gelap</string>
+    <string name="cd_add_transaction">Tambah transaksi baru</string>
+    <string name="cd_add_wallet">Tambah dompet baru</string>
+    <string name="cd_empty_finance">Ilustrasi dompet dan grafik keuangan</string>
+    <string name="msg_offline_badge">100% Offline • Data Lokal</string>
+</resources>
