@@ -446,7 +446,7 @@ private fun DailyLedgerCard(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                // Daily summary row: Masuk | Keluar | Selisih Bersih
+                // Daily summary row: Masuk | Keluar
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween
@@ -461,12 +461,6 @@ private fun DailyLedgerCard(
                         label = "Keluar",
                         value = formatSignedRupiah(ledger.totalExpense, isIncome = false),
                         valueColor = fintekColors.expense,
-                        modifier = Modifier.weight(1f)
-                    )
-                    LedgerHeaderMetric(
-                        label = "Bersih",
-                        value = formatRupiah(ledger.netAmount, showPlusSign = true),
-                        valueColor = if (ledger.netAmount >= 0L) fintekColors.income else fintekColors.expense,
                         modifier = Modifier.weight(1f),
                         alignEnd = true
                     )

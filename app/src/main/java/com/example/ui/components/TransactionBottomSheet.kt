@@ -29,11 +29,15 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -409,7 +413,7 @@ fun TransactionBottomSheet(
                     }
                 }
             } else {
-                // Category selector
+                // Category dropdown selector
                 Spacer(modifier = Modifier.height(14.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -428,45 +432,102 @@ fun TransactionBottomSheet(
                     }
                 }
                 Spacer(modifier = Modifier.height(4.dp))
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .horizontalScroll(rememberScrollState()),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+
+                var categoryDropdownExpanded by remember { mutableStateOf(false) }
+                val selectedCategory = categoriesForType.firstOrNull { it.id == selectedCategoryId }
+                    ?: categoriesForType.firstOrNull()
+
+                ExposedDropdownMenuBox(
+                    expanded = categoryDropdownExpanded,
+                    onExpandedChange = { categoryDropdownExpanded = it },
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    categoriesForType.forEach { category ->
-                        val selected = category.id == selectedCategoryId
-                        val catColor = Color(category.colorHex)
-                        Surface(
-                            shape = RoundedCornerShape(12.dp),
-                            color = if (selected) catColor.copy(alpha = 0.16f) else fintekColors.subtleSurface,
-                            border = if (selected) BorderStroke(1.5.dp, catColor) else null,
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(12.dp))
-                                .clickable { selectedCategoryId = category.id }
-                                .testTag("tx_category_chip_${category.id}")
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Icon(
-                                    imageVector = iconForKey(category.iconKey),
-                                    contentDescription = null,
-                                    tint = catColor,
-                                    modifier = Modifier.size(18.dp)
-                                )
-                                Spacer(modifier = Modifier.width(6.dp))
-                                Text(
-                                    text = category.name,
-                                    style = MaterialTheme.typography.labelMedium.copy(
-                                        fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium
-                                    ),
-                                    color = MaterialTheme.colorScheme.onSurface,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                )
+                    OutlinedTextField(
+                        value = selectedCategory?.name ?: "Pilih Kategori",
+                        onValueChange = {},
+                        readOnly = true,
+                        singleLine = true,
+                        leadingIcon = selectedCategory?.let { cat ->
+                            {
+                                val catColor = Color(cat.colorHex)
+                                Box(
+                                    modifier = Modifier
+                                        .size(30.dp)
+                                        .clip(RoundedCornerShape(8.dp))
+                                        .background(catColor.copy(alpha = 0.16f)),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        imageVector = iconForKey(cat.iconKey),
+                                        contentDescription = null,
+                                        tint = catColor,
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                }
                             }
+                        },
+                        trailingIcon = {
+                            ExposedDropdownMenuDefaults.TrailingIcon(expanded = categoryDropdownExpanded)
+                        },
+                        shape = RoundedCornerShape(14.dp),
+                        colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .menuAnchor(MenuAnchorType.PrimaryNotEditable)
+                            .testTag("tx_category_dropdown")
+                    )
+
+                    ExposedDropdownMenu(
+                        expanded = categoryDropdownExpanded,
+                        onDismissRequest = { categoryDropdownExpanded = false },
+                        containerColor = MaterialTheme.colorScheme.surface
+                    ) {
+                        categoriesForType.forEach { category ->
+                            val isSelected = category.id == selectedCategory?.id
+                            val catColor = Color(category.colorHex)
+                            DropdownMenuItem(
+                                text = {
+                                    Text(
+                                        text = category.name,
+                                        style = MaterialTheme.typography.bodyLarge.copy(
+                                            fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal
+                                        ),
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                },
+                                leadingIcon = {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(32.dp)
+                                            .clip(RoundedCornerShape(9.dp))
+                                            .background(catColor.copy(alpha = 0.16f)),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Icon(
+                                            imageVector = iconForKey(category.iconKey),
+                                            contentDescription = null,
+                                            tint = catColor,
+                                            modifier = Modifier.size(18.dp)
+                                        )
+                                    }
+                                },
+                                trailingIcon = if (isSelected) {
+                                    {
+                                        Icon(
+                                            imageVector = Icons.Rounded.Check,
+                                            contentDescription = "Terpilih",
+                                            tint = MaterialTheme.colorScheme.primary,
+                                            modifier = Modifier.size(18.dp)
+                                        )
+                                    }
+                                } else null,
+                                onClick = {
+                                    selectedCategoryId = category.id
+                                    categoryDropdownExpanded = false
+                                },
+                                modifier = Modifier.testTag("tx_category_option_${category.id}")
+                            )
                         }
                     }
                 }
