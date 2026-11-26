@@ -159,7 +159,7 @@ class ExampleUnitTest {
             )
         )
 
-        val ledgers = com.example.ui.screens.buildDailyLedgers(details)
+        val ledgers = com.example.ui.components.buildDailyLedgers(details)
         assertEquals(2, ledgers.size)
         assertEquals(3, ledgers[0].items.size)
         assertEquals(500_000L, ledgers[0].totalIncome)

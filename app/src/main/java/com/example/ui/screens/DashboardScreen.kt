@@ -37,6 +37,11 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -52,9 +57,10 @@ import com.example.R
 import com.example.data.local.TransactionDetail
 import com.example.data.local.TransactionType
 import com.example.data.local.WalletEntity
+import com.example.ui.components.DailyLedgerCard
 import com.example.ui.components.EmptyFinanceState
 import com.example.ui.components.MiniBalanceSparkline
-import com.example.ui.components.TransactionItemCard
+import com.example.ui.components.buildDailyLedgers
 import com.example.ui.theme.Emerald400
 import com.example.ui.theme.Emerald500
 import com.example.ui.theme.LocalFintekColors
@@ -82,6 +88,22 @@ fun DashboardScreen(
 ) {
     val fintekColors = LocalFintekColors.current
     val summary = uiState.dashboardSummary
+    val recentLedgers = remember(uiState.recentTransactions) {
+        buildDailyLedgers(uiState.recentTransactions)
+    }
+
+    var expandedDateKeys by remember { mutableStateOf<Set<String>>(emptySet()) }
+    var hasInitializedDefaultExpand by remember { mutableStateOf(false) }
+
+    LaunchedEffect(recentLedgers) {
+        val newestKey = recentLedgers.firstOrNull()?.dateKey
+        if (!hasInitializedDefaultExpand && newestKey != null) {
+            expandedDateKeys = setOf(newestKey)
+            hasInitializedDefaultExpand = true
+        } else if (newestKey != null && expandedDateKeys.none { key -> recentLedgers.any { it.dateKey == key } }) {
+            expandedDateKeys = setOf(newestKey)
+        }
+    }
 
     LazyColumn(
         modifier = modifier.fillMaxSize(),
@@ -347,7 +369,7 @@ fun DashboardScreen(
             }
         }
 
-        if (uiState.recentTransactions.isEmpty()) {
+        if (recentLedgers.isEmpty()) {
             item {
                 EmptyFinanceState(
                     title = "Belum Ada Transaksi",
@@ -357,10 +379,19 @@ fun DashboardScreen(
                 )
             }
         } else {
-            items(uiState.recentTransactions, key = { it.transaction.id }) { detail ->
-                TransactionItemCard(
-                    detail = detail,
-                    onClick = { onEditTransaction(detail) }
+            items(recentLedgers, key = { it.dateKey }) { ledger ->
+                val isExpanded = ledger.dateKey in expandedDateKeys
+                DailyLedgerCard(
+                    ledger = ledger,
+                    isExpanded = isExpanded,
+                    onToggleExpand = {
+                        expandedDateKeys = if (isExpanded) {
+                            expandedDateKeys - ledger.dateKey
+                        } else {
+                            expandedDateKeys + ledger.dateKey
+                        }
+                    },
+                    onEditTransaction = onEditTransaction
                 )
             }
         }
